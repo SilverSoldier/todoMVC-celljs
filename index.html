@@ -2,23 +2,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="res/cell.js"></script>
   <link href="res/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="res/index.css">
   <script>
-
-var Btn = {
-  $text: "Enter",
-  $type: "a",
-  href: "#",
-  class: "btn btn-dark",
-  // Change button parameters
-  // style: "padding: 20px; background: #FFD34E; color: rgba(150,0,0,0.8); font-weight: bold; text-decoration: none; font-family: HelveticaNeue, Helvetica, arial; margin: 10px; font-size: 30px; display: inline-block;",
-  onclick: function(e){
-	this._add();
-  }
-}
 
 var getTableRow = function(item){
   return {$type: "tr", $components: [
-	{ $type: "td", $text: item.name },
 	{ $type: "td", $components: [
 	  { $type: "input",
 		autocomplete: "off",
@@ -37,7 +25,8 @@ var getTableRow = function(item){
 		  this._updateTableRows()
 		}
 	  }]
-	}]
+	},
+	{ $type: "td", $text: item.name } ]
   }
 }
 
@@ -58,7 +47,14 @@ var Inp = {
   $components: [{
 	$type: "input",
 	id: "inp",
-  }, Btn]
+	class: "new-todo",
+	placeholder: "What needs to be done",
+	onkeyup: function(e){
+	  if(e.keyCode == 13){
+		this._add()
+	  }
+	}
+  }]
 }
 
 var TodosTable = { 
@@ -99,7 +95,9 @@ var App = {
 
   </script>
   <body>
-	<div><h1> todos </h1></div>
-	<div id="main"> </div>
+	<section class="todoapp">
+	  <h1> todos </h1>
+	  <div id="main"> </div>
+	</section>
   </body>
 </html>
