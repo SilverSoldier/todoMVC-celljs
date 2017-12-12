@@ -6,27 +6,36 @@
   <script>
 
 var getTableRow = function(item){
-  return {$type: "tr", $components: [
-	{ $type: "td", $components: [
+  return {
+	$type: "div",
+	class: "view",
+	$components: [
 	  { $type: "input",
 		autocomplete: "off",
+		class: "toggle",
+		id: item.name,
 		type: "checkbox",
 		onclick: function(e) {
 		  if(item.done){
 			item.done = false;
-			item.comp.$components[0] = { $type: "td", $text: item.name };
-			item.comp.$components[1].$components[0].checked = null
+			item.comp.$components[1] = { $type: "label", $text: item.name };
+			item.comp.$components[0].checked = null
 		  }
 		  else {
 			item.done = true
-			item.comp.$components[0] =  { $type: "td", $text: item.name, style: "text-decoration: line-through; color: #d9d9d9;" };
-			item.comp.$components[1].$components[0].checked = true;
+			item.comp.$components[1] =  { $type: "label", $text: item.name, style: "text-decoration: line-through; color: #d9d9d9;" };
+			item.comp.$components[0].checked = true;
 		  }
 		  this._updateTableRows()
 		}
-	  }]
-	},
-	{ $type: "td", $text: item.name } ]
+	  },
+	{ $type: "label", $text: item.name },
+	{ $type: "button",
+	  class: "btn btn-warning destroy ",
+	  onclick: function(e){
+		this._remove(item)
+	  }
+	}]
   }
 }
 
@@ -41,7 +50,6 @@ var Inp = {
   _add: function() {
 	var newTodo = new Todo(document.querySelector('#inp').value, false);
 	this._todos.push(newTodo)
-	this._lastTodo = newTodo
 	document.querySelector('#inp').value = "";
   },
   $components: [{
@@ -58,25 +66,58 @@ var Inp = {
 }
 
 var TodosTable = { 
-  $type: "table",
-  class: "table table-bordered",
+  $type: "ul",
+  class: "todo-list",
   $components: [
-	{ $type: "tbody",
+	{ $type: "li",
+	  class: "todo",
 	  $components: [],
-	  _addTableRow: function(){
-		if(this._lastTodo != null){
-		// this.$components = this._todos.map(item => item.comp)
-		this.$components.push(this._lastTodo.comp)
-		this._lastTodo = null
-		}
-	  },
 	  _updateTableRows: function(){
-		this.$components = this._todos.map(item => item.comp)
-		console.log(this.$components)
+		this.$components = this._display.map(item => item.comp)
 	  }
 	} ],
-  _updateTodosTable: function(){
-	this.$components[0]._addTableRow()
+  _update: function(list){
+	this.$components[0]._updateTableRows()
+  }
+}
+
+var Footer = {
+  $type: "footer",
+  class: "hidden",
+  $components: [
+	{ $type: "span",
+	  class: "todo-count",
+	  $text: 0,
+	  _updateCount: function(){
+		this.$text = this._todos.length + " items left"
+	  }
+	},
+	{ $type: "ul",
+	  class: "filters",
+	  $components: [
+		{ $type: "li",
+		  $components: [
+			{ $type: "a",
+			  href: "#/all",
+			  $text: "All",
+			  onclick: function() { this._updateFilter(function(x) {return true}) } 
+			},
+			{ $type: "a",
+			  href: "#/active",
+			  $text: "Active",
+			  onclick: function() { this._updateFilter(function(x) {return !x.done})} 
+			},
+			{ $type: "a",
+			  href: "#/completed",
+			  $text: "Completed",
+			  onclick: function() { this._updateFilter(function(x) {return x.done})} 
+			}
+		  ]
+		}]
+	}],
+  _update: function(){
+	this.class = "footer"
+	this.$components[0]._updateCount()
   }
 }
 
@@ -85,11 +126,26 @@ var App = {
   $type: "div",
   style: "border: 5px",
   id: "main",
-  _lastTodo: {},
   _todos: [],
-  $components: [Inp, TodosTable],
+  _display: [],
+  $components: [Inp, TodosTable, Footer],
   $update: function() {
-	this.$components[1]._updateTodosTable();  
+	this._updateDisplay()
+	this.$components[1]._update(this._todos);  
+	this.$components[2]._update()
+  },
+  _remove: function(todo){
+	var index = this._todos.indexOf(todo);
+	this._todos.splice(index, 1)
+	this.$update()
+  },
+  _filter: function(x) { return true },
+  _updateFilter: function(fn) { 
+	this._filter = fn 
+	this.$update()
+  },
+  _updateDisplay: function(){
+	this._display = this._todos.filter(this._filter)
   }
 }
 
