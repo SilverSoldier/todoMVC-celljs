@@ -13,25 +13,29 @@ var getTableRow = function(item){
 	  { $type: "input",
 		autocomplete: "off",
 		class: "toggle",
-		id: item.name,
 		type: "checkbox",
 		onclick: function(e) {
 		  if(item.done){
 			item.done = false;
-			item.comp.$components[1] = { $type: "label", $text: item.name };
+			item.comp.$components[1].class = ""
 			item.comp.$components[0].checked = null
 		  }
 		  else {
 			item.done = true
-			item.comp.$components[1] =  { $type: "label", $text: item.name, style: "text-decoration: line-through; color: #d9d9d9;" };
+			item.comp.$components[1].class = "completed"
 			item.comp.$components[0].checked = true;
 		  }
-		  this._updateTableRows()
+		  this._updateApp()
 		}
 	  },
-	{ $type: "label", $text: item.name },
+	{ $type: "label",
+	  $text: item.name,
+	  ondblclick: function(e) {
+		this._edit(item)
+	  }
+	},
 	{ $type: "button",
-	  class: "btn btn-warning destroy ",
+	  class: "destroy",
 	  onclick: function(e){
 		this._remove(item)
 	  }
@@ -89,9 +93,8 @@ var Footer = {
 	  class: "todo-count",
 	  $text: 0,
 	  _updateCount: function(){
-		var len = this._todos.length
+		var len = this._todos.filter(function(x) { return !x.done; }).length
 		this.$text = len + (len == 1 ? " item ":" items ") + "left"
-		return len > 0
 	  }
 	},
 	{ $type: "ul",
@@ -127,7 +130,8 @@ var Footer = {
 	  ]
 	}],
   _update: function(){
-	if(this.$components[0]._updateCount())
+	this.$components[0]._updateCount()
+	if(this._todos.length != 0)
 	  this.class = "footer";
 	else this.class = "hidden"
   }
@@ -143,9 +147,10 @@ var App = {
   $components: [Inp, TodosTable, Footer],
   $update: function() {
 	this._updateDisplay()
-	this.$components[1]._update(this._todos);  
+	this.$components[1]._update();  
 	this.$components[2]._update()
   },
+  _updateApp: function(){ this.$update() },
   _remove: function(todo){
 	var index = this._todos.indexOf(todo);
 	this._todos.splice(index, 1)
