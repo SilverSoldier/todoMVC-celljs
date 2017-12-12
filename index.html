@@ -29,7 +29,7 @@ var getTableRow = function(item){
 		}
 	  },
 	{ $type: "label",
-	  $text: item.name,
+	  $text: item.desc,
 	  ondblclick: function(e) {
 		this._edit(item)
 	  }
@@ -43,8 +43,13 @@ var getTableRow = function(item){
   }
 }
 
-function Todo(name, done){
-  this.name = name;
+/** Object Todo:
+ * desc: String: Todo description
+ * done: bool: Whether Todo is completed or not
+ * comp: Array of nodes: The component corresponding to this todo
+ */
+function Todo(desc, done){
+  this.desc = desc;
   this.done = done;
   this.comp = Object.create(getTableRow(this))
 }
@@ -76,7 +81,7 @@ var TodosTable = {
 	{ $type: "li",
 	  class: "todo",
 	  $components: [],
-	  _updateTableRows: function(){
+	  _umpdateTableRows: function(){
 		this.$components = this._display.map(item => item.comp)
 	  }
 	} ],
