@@ -1,0 +1,105 @@
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="res/cell.js"></script>
+  <link href="res/bootstrap.min.css" rel="stylesheet">
+  <script>
+
+var Btn = {
+  $text: "Enter",
+  $type: "a",
+  href: "#",
+  class: "btn btn-dark",
+  // Change button parameters
+  // style: "padding: 20px; background: #FFD34E; color: rgba(150,0,0,0.8); font-weight: bold; text-decoration: none; font-family: HelveticaNeue, Helvetica, arial; margin: 10px; font-size: 30px; display: inline-block;",
+  onclick: function(e){
+	this._add();
+  }
+}
+
+var getTableRow = function(item){
+  return {$type: "tr", $components: [
+	{ $type: "td", $text: item.name },
+	{ $type: "td", $components: [
+	  { $type: "input",
+		autocomplete: "off",
+		type: "checkbox",
+		onclick: function(e) {
+		  if(item.done){
+			item.done = false;
+			item.comp.$components[0] = { $type: "td", $text: item.name };
+			item.comp.$components[1].$components[0].checked = null
+		  }
+		  else {
+			item.done = true
+			item.comp.$components[0] =  { $type: "td", $text: item.name, style: "text-decoration: line-through; color: #d9d9d9;" };
+			item.comp.$components[1].$components[0].checked = true;
+		  }
+		  this._updateTableRows()
+		}
+	  }]
+	}]
+  }
+}
+
+function Todo(name, done){
+  this.name = name;
+  this.done = done;
+  this.comp = Object.create(getTableRow(this))
+}
+
+var Inp = {
+  $type: "div",
+  _add: function() {
+	var newTodo = new Todo(document.querySelector('#inp').value, false);
+	this._todos.push(newTodo)
+	this._lastTodo = newTodo
+	document.querySelector('#inp').value = "";
+  },
+  $components: [{
+	$type: "input",
+	id: "inp",
+  }, Btn]
+}
+
+var TodosTable = { 
+  $type: "table",
+  class: "table table-bordered",
+  $components: [
+	{ $type: "tbody",
+	  $components: [],
+	  _addTableRow: function(){
+		if(this._lastTodo != null){
+		// this.$components = this._todos.map(item => item.comp)
+		this.$components.push(this._lastTodo.comp)
+		this._lastTodo = null
+		}
+	  },
+	  _updateTableRows: function(){
+		this.$components = this._todos.map(item => item.comp)
+		console.log(this.$components)
+	  }
+	} ],
+  _updateTodosTable: function(){
+	this.$components[0]._addTableRow()
+  }
+}
+
+var App = {
+  $cell: true,
+  $type: "div",
+  style: "border: 5px",
+  id: "main",
+  _lastTodo: {},
+  _todos: [],
+  $components: [Inp, TodosTable],
+  $update: function() {
+	this.$components[1]._updateTodosTable();  
+  }
+}
+
+  </script>
+  <body>
+	<div><h1> todos </h1></div>
+	<div id="main"> </div>
+  </body>
+</html>
