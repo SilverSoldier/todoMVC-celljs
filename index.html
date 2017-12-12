@@ -5,41 +5,49 @@
   <link rel="stylesheet" href="res/index.css">
   <script>
 
+var CheckBox = {
+  $type: "input",
+  autocomplete: "off",
+  class: "toggle",
+  type: "checkbox",
+  onclick: function(e) {
+	if(item.done){
+	  item.done = false;
+	  item.comp.$components[1].class = ""
+	  item.comp.$components[0].checked = null
+	}
+	else {
+	  item.done = true
+	  item.comp.$components[1].class = "completed"
+	  item.comp.$components[0].checked = true;
+	}
+	this._updateApp()
+  }
+}
+
 var getTableRow = function(item){
   return {
-	$type: "div",
-	class: "view",
+	$type: "li",
+	class: "todo",
 	$components: [
-	  { $type: "input",
-		autocomplete: "off",
-		class: "toggle",
-		type: "checkbox",
-		onclick: function(e) {
-		  if(item.done){
-			item.done = false;
-			item.comp.$components[1].class = ""
-			item.comp.$components[0].checked = null
+	  { $type: "div",
+		class: "view",
+		$components: [
+		  { $type: "label",
+			$text: item.desc,
+			ondblclick: function(e) {
+			  this._edit(item)
+			}
+		  },
+		  CheckBox,
+		  { $type: "button",
+			class: "destroy",
+			onclick: function(e){
+			  this._remove(item)
+			}
 		  }
-		  else {
-			item.done = true
-			item.comp.$components[1].class = "completed"
-			item.comp.$components[0].checked = true;
-		  }
-		  this._updateApp()
-		}
-	  },
-	{ $type: "label",
-	  $text: item.desc,
-	  ondblclick: function(e) {
-		this._edit(item)
-	  }
-	},
-	{ $type: "button",
-	  class: "destroy",
-	  onclick: function(e){
-		this._remove(item)
-	  }
-	}]
+		]
+	  }]
   }
 }
 
@@ -54,6 +62,9 @@ function Todo(desc, done){
   this.comp = Object.create(getTableRow(this))
 }
 
+/**
+ * Component corresponding to the input field in Todo app
+ */
 var Inp = {
   $type: "div",
   _add: function() {
@@ -74,19 +85,12 @@ var Inp = {
   }]
 }
 
-var TodosTable = { 
+var TodosList = { 
   $type: "ul",
   class: "todo-list",
-  $components: [
-	{ $type: "li",
-	  class: "todo",
-	  $components: [],
-	  _umpdateTableRows: function(){
-		this.$components = this._display.map(item => item.comp)
-	  }
-	} ],
+  $components: [],
   _update: function(list){
-	this.$components[0]._updateTableRows()
+	this.$components = this._display.map(item => item.comp)
   }
 }
 
@@ -144,12 +148,12 @@ var Footer = {
 
 var App = {
   $cell: true,
-  $type: "div",
+  $type: "section",
   id: "main",
   class: "main",
   _todos: [],
   _display: [],
-  $components: [Inp, TodosTable, Footer],
+  $components: [Inp, TodosList, Footer],
   $update: function() {
 	this._updateDisplay()
 	this.$components[1]._update();  
@@ -175,7 +179,7 @@ var App = {
   <body>
 	<section class="todoapp">
 	  <h1> todos </h1>
-	  <div id="main"> </div>
+	  <section id="main"> </section>
 	</section>
   </body>
 </html>
