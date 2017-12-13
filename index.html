@@ -1,27 +1,34 @@
 <html>
+  <head>
+  <meta charset="utf-8">
+  <title>Cell.js • TodoMVC</title>
+  </head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="res/cell.js"></script>
   <link href="res/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="res/index.css">
   <script>
 
-var CheckBox = {
-  $type: "input",
-  autocomplete: "off",
-  class: "toggle",
-  type: "checkbox",
-  onclick: function(e) {
-	if(item.done){
-	  item.done = false;
-	  item.comp.$components[1].class = ""
-	  item.comp.$components[0].checked = null
+var CheckBox = function(item) {
+  return {
+	$type: "input",
+	autocomplete: "off",
+	class: "toggle",
+	type: "checkbox",
+	onclick: function(e) {
+	  console.log(item)
+	  if(item.done){
+		item.done = false;
+		item.comp.$components[0].$components[0].class = ""
+		item.comp.$components[0].$components[1].checked = null
+	  }
+	  else {
+		item.done = true
+		item.comp.$components[0].$components[0].class = "completed"
+		item.comp.$components[0].$components[1].checked = true;
+	  }
+	  this._updateApp()
 	}
-	else {
-	  item.done = true
-	  item.comp.$components[1].class = "completed"
-	  item.comp.$components[0].checked = true;
-	}
-	this._updateApp()
   }
 }
 
@@ -39,7 +46,7 @@ var getTableRow = function(item){
 			  this._edit(item)
 			}
 		  },
-		  CheckBox,
+		  CheckBox(item),
 		  { $type: "button",
 			class: "destroy",
 			onclick: function(e){
@@ -85,6 +92,8 @@ var Inp = {
   }]
 }
 
+/** Component corresponding to the displayed list of todos
+ */
 var TodosList = { 
   $type: "ul",
   class: "todo-list",
@@ -166,8 +175,8 @@ var App = {
 	this.$update()
   },
   _filter: function(x) { return true },
-  _updateFilter: function(fn) { 
-	this._filter = fn 
+  _updateFilter: function(filter_fn) { 
+	this._filter = filter_fn 
 	this.$update()
   },
   _updateDisplay: function(){
